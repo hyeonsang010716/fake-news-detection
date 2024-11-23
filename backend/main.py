@@ -1,21 +1,17 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
-from pathlib import Path
 # from langserve import add_routes
+
 # from models * agent_executor
+
 
 app = FastAPI()
 
-DOWNLOAD_DIR = Path("./downloads")
-DOWNLOAD_DIR.mkdir(exist_ok=True) # 디렉토리가 없으면 생성
+origins = [
+    "http://localhost:5173",
+]
 
-class VideoDownloadRequest(BaseModel):
-    url: str
-
-@app.get("/")
-def direct_root_path():
-    return {"message": "안녕하세요"}
+# app.include_router(user_router.router)
 
 # 이후 agent_executor 생성하면 여기에 연결
 # class Input(BaseModel):
@@ -34,7 +30,15 @@ def direct_root_path():
 #     ),
 # )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
