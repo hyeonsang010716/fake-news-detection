@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from database import Base
+from database.database import Base
 
 
 class User(Base):
@@ -8,7 +8,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    email = Column(String, nullable=False)
 
 class Question(Base):
     __tablename__ = "question"
@@ -17,7 +16,7 @@ class Question(Base):
     user_id = Column(Integer, ForeignKey("user.id"))
     subject = Column(String, nullable=False)
     content = Column(Text, nullable=False)
-    user = relationship("User", backref="Questions")
+    user = relationship("User", backref="questions")
 
 class Answer(Base):
     __tablename__ = "answer"

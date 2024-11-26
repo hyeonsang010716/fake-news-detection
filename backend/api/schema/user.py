@@ -1,9 +1,8 @@
-from database.models import User
 from pydantic import BaseModel
+from typing import Optional
 
 class UserBase(BaseModel):
-    name = str
-    email = str
+    name: str
 
 class UserCreate(UserBase):
     pass
@@ -11,7 +10,10 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
 
+    class Config:
+        orm_mode = True
+
+
 class UserDelete(BaseModel):
-    id: int | None = None
-    name = str | None = None
-    email = str | None = None
+    id: Optional[int]
+    name: Optional[str]
