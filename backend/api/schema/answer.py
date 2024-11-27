@@ -1,0 +1,17 @@
+from pydantic import BaseModel
+from typing import List, Optional
+
+from api.schema.question import Question
+
+class AnswerBase(BaseModel):
+    content: str
+
+class AnswerCreate(AnswerBase):
+    pass
+
+class Answer(AnswerBase):
+    id: int
+    question: Question
+
+    class Config:
+        orm_mode = True

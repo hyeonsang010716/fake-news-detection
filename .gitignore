@@ -2,3 +2,6 @@
 __pycache__/
 .csv
 llm
+myapp
+requirements.txt
+fake-news
