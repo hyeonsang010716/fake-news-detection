@@ -11,7 +11,6 @@ class QuestionCreate(QuestionBase):
 
 class Question(QuestionBase):
     id: int
-    subject: Optional[str]
     user: Optional[User]
 
     class Config:

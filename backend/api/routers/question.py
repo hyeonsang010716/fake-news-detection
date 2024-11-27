@@ -9,18 +9,21 @@ router = APIRouter(
     prefix="/api/question"
 )
 
-@router.post("/", response_model=question.Question)
-def answer_question(q: str, db: Session = Depends(get_db)):
-    if db.query(Question).filter(question.content == q) is not None:
-        return db.query(Question).filter(question.content == q).answer
+@router.post("/", response_model=answer.Answer)
+def answer_question(question: question.QuestionCreate, db: Session = Depends(get_db)):
+    # if db.query(Question).filter(question.content == question.content) is not None:
+    #     return db.query(Question).filter(question.content == question.content).answer
     try:
-        answer = "답변입니당"
-        new_answer = Answer(content=answer)
-        new_question = Question(content=q, answer=new_answer)
+        new_question = Question(content=question.content)
+
+        model_answer = "답변입니당"
+        new_answer = Answer(content=model_answer, question=new_question)
+        
         db.add(new_question)
+        db.add(new_answer)
         db.commit()
-        db.refresh(new_question)
-        return new_question
+        db.refresh(new_answer)
+        return new_answer
     except Exception as e:
         return HTTPException(status_code=400, detail=str(e))
         
