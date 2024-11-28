@@ -14,7 +14,7 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("user.id"))
-    subject = Column(String, nullable=False)
+    subject = Column(String, nullable=True)
     content = Column(Text, nullable=False)
     user = relationship("User", backref="questions")
 

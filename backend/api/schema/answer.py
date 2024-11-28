@@ -15,3 +15,7 @@ class Answer(AnswerBase):
 
     class Config:
         orm_mode = True
+
+class AnswerDelete(BaseModel):
+    id: Optional[int]
+    content: Optional[str]
