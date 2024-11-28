@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from api.routers import question, user
+from api.routers import chat
+from api.routers import login
 
 app = FastAPI()
 
@@ -13,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.include_router(user.router)
 app.include_router(question.router)
 
 if __name__ == "__main__":
