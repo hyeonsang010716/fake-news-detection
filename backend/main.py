@@ -14,7 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(question.router)
+app.include_router(chat.router)
+# app.include_router(login.router)
 
 if __name__ == "__main__":
     import uvicorn

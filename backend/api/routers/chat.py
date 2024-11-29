@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List, Dict
 
 from database.models import Question, Answer, User
 from api.schema import question, answer
@@ -10,6 +11,11 @@ from model.agent import Agent
 router = APIRouter(
     prefix="/api/chat"
 )
+
+@router.get("/", response_model=Dict[str, str])
+def get_all_question(db: Session = Depends(get_db)):
+    _questions_lists = db.query(Question).all()
+    return {question.content: question.answers[0].content for question in _questions_lists}
 
 @router.post("/", response_model=question.Question)
 def answer_questio(question: question.QuestionCreate, db: Session = Depends(get_db)):
@@ -26,7 +32,7 @@ def answer_questio(question: question.QuestionCreate, db: Session = Depends(get_
         # model_answer = graph.invoke({"youtube_content" : question.content})
         # if not model_answer:
         #     model_answer="죄송합니다. 질문에 대한 답변이 어렵습니다."
-        model_answer = "몰러유"
+        model_answer = "안녕하세요"
         new_answer = Answer(content=model_answer, question=new_question)
 
         db.add(new_question)
