@@ -1,8 +1,10 @@
 from model.agent import Agent
 
+
 agent = Agent()
 
 graph = agent.graph # model
+
 
 temp = """K팝 그룹 ‘빅뱅’이 지드래곤의 신곡을 통해 2년7개월 만에 다시 뭉쳤다.
 
@@ -12,4 +14,9 @@ temp = """K팝 그룹 ‘빅뱅’이 지드래곤의 신곡을 통해 2년7개�
 
 ‘홈 스위트 홈’은 과거의 향수가 느껴지는 힙합 리듬 위에 지드래곤의 자유로운 랩이 펼쳐지는 곡이다. 갤럭시코퍼레이션은 “팬들과 대중의 곁을 한순간도 떠난 적이 없다는 메시지를 담았다”며 “무대 위에서 자유롭게 뛰놀며 즐기는 듯한 가사와 리듬을 통해 듣는 이들에게 즐거움을 선사한다”고 소개했다."""
 
-print(graph.invoke({"youtube_content" : temp}))
+url = "https://www.youtube.com/watch?v=-eLJd-OA9zY"
+
+#print(graph.invoke({"youtube_content" : temp}))
+
+print(graph.invoke({"youtube_link" : url}))
+
