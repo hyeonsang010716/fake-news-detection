@@ -10,10 +10,6 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
 
-    class Config:
-        from_attributes = True
-
-
 class UserDelete(BaseModel):
     id: Optional[int]
     name: Optional[str]

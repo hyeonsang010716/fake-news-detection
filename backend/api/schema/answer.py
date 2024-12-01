@@ -13,9 +13,6 @@ class Answer(AnswerBase):
     id: int
     question: Question
 
-    class Config:
-        from_attributes = True
-
 class AnswerDelete(BaseModel):
     id: Optional[int]
     content: Optional[str]
