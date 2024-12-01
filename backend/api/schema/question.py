@@ -17,6 +17,3 @@ class Question(QuestionBase):
     id: int
     user: Optional[User]
     answers: List[AnswerBase]
-
-    class Config:
-        from_attributes = True

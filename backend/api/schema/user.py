@@ -1,5 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+class QuestionBase(BaseModel):
+    id: int
+    content: str
 
 class UserBase(BaseModel):
     name: str
@@ -9,10 +13,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-
-    class Config:
-        from_attributes = True
-
+    questions: List[QuestionBase]
 
 class UserDelete(BaseModel):
     id: Optional[int]

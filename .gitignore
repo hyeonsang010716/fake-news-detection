@@ -6,3 +6,4 @@ myapp
 requirements.txt
 fake-news
 .vscode
+database.db
