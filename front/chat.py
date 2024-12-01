@@ -11,6 +11,7 @@ def response_generator(response):
 
 def chat_llm(api_base_url):
     st.title("fake new detection")
+    
 
     # 채팅 기록 처리
     if "messages" not in st.session_state:
@@ -33,23 +34,23 @@ def chat_llm(api_base_url):
                 st.session_state.messages = []
                 st.rerun()
             elif cmd == "questions":
-                is_connected, _questions, answers = request_server(api_base_url, "get")
-                if not is_connected:
+                question_list = request_server(api_base_url, "get")
+                if not question_list:
                     st.error(answer)
                     st.stop()
-                st.markdown("### Questions")
-                for question, answer in list(answers):
-                    st.markdown(f"- {question}: {answer}")
+                st.markdown("## Questions")
+                for question in question_list:
+                    st.markdown("### {}".format({question["content"]}))
+                    for answer in question["answers"]:
+                        st.markdown("- {}".format(answer["content"]))
                 
             else:
                 st.error("Wrong command")
         else:
             # 메시지 기록에 담을 답변 내용을 생성
-            user_data = {"content": prompt}
-            is_connected, answer = request_server(api_base_url, "post", user_data)
-            if not is_connected:
-                st.error(answer)
-                st.stop()
+            user_data = st.session_state.user_info
+            question_data = {"content": prompt}
+            answer = request_server(api_base_url, "post", {"question": question_data, "user": user_data})
 
             assistant_response = ""
             with st.chat_message("assistant"):
@@ -61,19 +62,21 @@ def chat_llm(api_base_url):
             st.session_state.messages.append({"role": "assistant", "content": assistant_response})
 
 
-def request_server(api_base_url: str, type: str, json_data: Dict=None) -> Union[Tuple[bool, str], Tuple[bool, List, List]]:
+def request_server(api_base_url: str, type: str, json_data: Dict=None) -> Union[str, Dict[str, str]]:
     if type == "post":
         response = requests.post(f"{api_base_url}/chat/", json=json_data)
         if response.status_code ==200:
             answer = response.json().get("answers")
-            return [True, answer[0]["content"]]
+            return answer[0]["content"]
         else:
-            return [False, f"Failed connect server: {response.json().get('detail')}"]
+            st.error(f"Failed connect server: {response.json().get('detail')}")
+            st.stop()
     elif type == "get":
         response = requests.get(f"{api_base_url}/chat/")
         if response.status_code ==200:
             data = response.json()
-            return [True, data.keys(), data.items()]
+            return data
         else:
-            return [False, f"Failed connect server: {response.json().get('detail')}"]
+            st.error(f"Failed connect server: {response.json().get('detail')}")
+            st.stop()
         

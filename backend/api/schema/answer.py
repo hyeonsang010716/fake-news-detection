@@ -11,7 +11,6 @@ class AnswerCreate(AnswerBase):
 
 class Answer(AnswerBase):
     id: int
-    question: Question
 
 class AnswerDelete(BaseModel):
     id: Optional[int]
