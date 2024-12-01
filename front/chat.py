@@ -38,11 +38,12 @@ def chat_llm(api_base_url):
                 if not question_list:
                     st.error(answer)
                     st.stop()
-                st.markdown("## Questions")
-                for question in question_list:
-                    st.markdown("### {}".format({question["content"]}))
-                    for answer in question["answers"]:
-                        st.markdown("- {}".format(answer["content"]))
+                st.table(question_list)
+                # st.markdown("## Questions")
+                # for question in question_list:
+                #     st.markdown("### {}".format({question["content"]}))
+                #     for answer in question["answers"]:
+                #         st.markdown("- {}".format(answer["content"]))
                 
             else:
                 st.error("Wrong command")
