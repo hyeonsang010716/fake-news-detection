@@ -49,8 +49,6 @@ def fetch_news_content(keyword):
     news_contents.append("관련 기사가 없습니다.")
 
 
-
-    
     return news_contents[0]
 
 # 함수 실행 예시

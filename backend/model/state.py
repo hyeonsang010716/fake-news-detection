@@ -7,12 +7,14 @@ from langchain.schema import HumanMessage
 class State(TypedDict):
     youtube_link : str
     youtube_content : str
+    youtube_header : str
+    youtube_summary_content : str
     keywords : List[str]
-    naver_news : str                     
+    search_results : List[str]                     
     response: str                              
     
     
 class Sentence(BaseModel):
-    text: List[str] = Field(
-        description="A list of core keyword extracted from the text."
+    texts: List[str] = Field(
+        description="A list of sentences that collectively include all core information from the text."
     )

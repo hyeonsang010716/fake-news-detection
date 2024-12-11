@@ -17,5 +17,5 @@ temp = """K팝 그룹 ‘빅뱅’이 지드래곤의 신곡을 통해 2년7개�
 url = "https://www.youtube.com/watch?v=-eLJd-OA9zY"
 
 #print(graph.invoke({"youtube_content" : temp}))
-
-print(graph.invoke({"youtube_link" : url}))
+response = graph.invoke({"youtube_link" : url})
+print(response["response"])

@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI , AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
 from langchain_core.chat_history import BaseChatMessageHistory
@@ -24,7 +24,7 @@ import os
 from langchain_core.tools import Tool
 import gc
 
-from langchain_teddynote.tools.tavily import TavilySearch
+from model.tools.tavily_search import TavilySearch
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import RemoveMessage
 from langgraph.graph import StateGraph, START, END
@@ -44,107 +44,134 @@ class Agent:
 
     def __init__(self):
         load_dotenv()
-        self.model = ChatOpenAI(model="gpt-4o", temperature=0)
+        # self.model = ChatOpenAI(model="gpt-4o", temperature=0)
+        self.model = AzureChatOpenAI(model="gpt-4o", temperature=0)
         self.graph = self.__graph_init()
 
 
     def youtube_download(self, state: State) -> State:
-
         print("---- this node is youtube_download ----")
 
-        audio = download_audio(state["youtube_link"])
+        audio , youtube_header = download_audio(state["youtube_link"])
 
         text = transcribe_audio(audio)
 
-        return State(youtube_content=text)
+        return State(youtube_content=text , youtube_header=youtube_header)
 
-    def generation_question(self, state: State) -> State:
-        
-        print("---- this node is generation_question ----")
-
+    def summary_news(self, state: State) -> State:
+        print("---- this node is summary_news ----")
         prompt = PromptTemplate(
-            template=prompts.generation_question_prompt,
-            input_variables= ["content"],
+            template=prompts.summary_news_prompt,
+            input_variables= ["news"],
+        )
+
+        chain = prompt | self.model | StrOutputParser()
+        
+        output = chain.invoke({"news" : state["youtube_content"]})
+        
+        print(output)
+        
+        return State(youtube_summary_content=output)
+    
+    def generation_news_core_sentence(self, state: State) -> State:
+        print("---- this node is generation_news_core_sentence ----")
+        prompt = PromptTemplate(
+            template=prompts.generation_news_core_sentence_prompt,
+            input_variables= ["summary_news"],
         )
 
         chain = prompt | self.model.with_structured_output(Sentence)
         
-        output = chain.invoke({"content" : state["youtube_content"]})
+        output = chain.invoke({"summary_news" : state["youtube_summary_content"] , "youtube_header" : state["youtube_header"]})
         
-        print(output.text)
+        print(output.texts)
         
-        #return {"keywords": output.text}
-        return State(keywords=output.text)
+        return State(keywords=output.texts)
 
-    def search_naver_news(self, state: State) -> State:
-        print("---- this node is search_naver_news ----")
+    # def search_naver_news(self, state: State) -> State:
+    #     print("---- this node is search_naver_news ----")
         
-        tasks = [fetch_news_content(keyword) for keyword in state["keywords"]]
+    #     tasks = [fetch_news_content(keyword) for keyword in state["keywords"]]
      
-        print(tasks)
+    #     print(tasks)
      
-        outputs = "\n".join(tasks)
+    #     outputs = "\n".join(tasks)
         
-        # return {"naver_news": outputs}
-        return State(naver_news=outputs)
+    #     # return {"naver_news": outputs}
+    #     return State(naver_news=outputs)
     
     def search_Tavily(self, state: State) -> State:
         print("---- this node is search_Tavily ----")
         
         tavily_tool = TavilySearch()
         
-        tasks = []
+        search_results = []
         
         for keyword in state["keywords"]:
-            search_result = tavily_tool.search(
+            
+            result = tavily_tool.search(
                 query=keyword,  # 검색 쿼리
-                topic="news",  # 일반 주제
+                topic="news",  # 뉴스 주제
                 days=100,
-                max_results=1,  # 최대 검색 결과
+                max_results=3,  # 최대 검색 결과
                 format_output=True,  # 결과 포맷팅
             )
-            tasks.append("\n".join(search_result))
-     
-        #print(tasks)
-     
-        outputs = "\n".join(tasks)
+            
+            search_results.append("\n".join(result))
         
-        # return {"naver_news": outputs}
-        return State(naver_news=outputs)    
+        return State(search_results=search_results)    
     
     def fake_news_detection(self, state: State) -> State:
-        
         print("---- this node is generation_question ----")
 
         prompt = PromptTemplate(
             template=prompts.fake_news_detection_prompt,
-            input_variables=["content" , "news"],
+            input_variables=["context" , "query"],
         )
 
         chain = prompt | self.model | StrOutputParser()
         
-        output = chain.invoke({"content" : state["youtube_content"] , "news" : state["naver_news"]})
+        works = [
+            {"context": context, "query": query}
+            for context , query in zip(state["search_results"] , state["keywords"])
+        ]
+
+        results = chain.batch(works)
         
-        # return {"response" , output}
-        return State(response=output)
+        return State(response=results)
 
     def __graph_init(self):
 
         graph_builder = StateGraph(State)
         graph_builder.add_node("youtube_download", self.youtube_download)
-        graph_builder.add_node("generation_question", self.generation_question)
+        graph_builder.add_node("summary_news", self.summary_news)
+        graph_builder.add_node("generation_news_core_sentence", self.generation_news_core_sentence)
         #graph_builder.add_node("search_naver_news", self.search_naver_news)
         graph_builder.add_node("search_Tavily", self.search_Tavily)
         graph_builder.add_node("fake_news_detection", self.fake_news_detection)
 
-        graph_builder.add_edge("youtube_download", "generation_question")
-        #graph_builder.add_edge("generation_question", "search_naver_news")
-        graph_builder.add_edge("generation_question", "search_Tavily") 
-        #graph_builder.add_edge("search_naver_news", "fake_news_detection")
+        graph_builder.add_edge(START, "youtube_download")
+        graph_builder.add_edge("youtube_download", "summary_news")
+        graph_builder.add_edge("summary_news", "generation_news_core_sentence")
+        graph_builder.add_edge("generation_news_core_sentence", "search_Tavily") 
         graph_builder.add_edge("search_Tavily", "fake_news_detection")
         graph_builder.add_edge("fake_news_detection", END)
-
-        graph_builder.set_entry_point("youtube_download")
+        
         graph = graph_builder.compile()
+
+        # def save_graph_image(graph, filename="graph.png"):
+        #     try:
+        #         # Get the image data as PNG
+        #         image_data = graph.get_graph(xray=True).draw_mermaid_png()
+
+        #         # Save to a file
+        #         with open(filename, "wb") as f:
+        #             f.write(image_data)
+
+        #         print(f"Graph image saved as {filename}")
+        #     except Exception as e:
+        #         print(f"Error saving graph image: {e}")
+
+        # save_graph_image(graph, "graph.png")
 
         return graph
