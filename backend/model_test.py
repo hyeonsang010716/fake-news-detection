@@ -3,7 +3,7 @@ from model.agent import Agent
 
 agent = Agent()
 
-graph = agent.graph # model
+graph = agent.graph
 
 
 temp = """K팝 그룹 ‘빅뱅’이 지드래곤의 신곡을 통해 2년7개월 만에 다시 뭉쳤다.
@@ -16,6 +16,14 @@ temp = """K팝 그룹 ‘빅뱅’이 지드래곤의 신곡을 통해 2년7개�
 
 url = "https://www.youtube.com/watch?v=-eLJd-OA9zY"
 
-#print(graph.invoke({"youtube_content" : temp}))
+# 시작은 url로 시작해야함.
+response = graph.invoke({"youtube_link" : url})
 
-print(graph.invoke({"youtube_link" : url}))
+print("유튜브 내용 :")
+print(response["youtube_summary_content"])
+
+print("유튜브 주장들 : ")
+print(response["keywords"])
+
+print("주장들 결과 : ")
+print(response["response"])

@@ -3,11 +3,17 @@ from pytubefix import YouTube
 from pytubefix.cli import on_progress
 import moviepy.editor
 from dotenv import load_dotenv
-from openai import OpenAI
-
+from openai import OpenAI , AzureOpenAI
+import os
 load_dotenv()
 
 client = OpenAI()
+
+# client = AzureOpenAI(
+#     api_key = os.getenv('AZURE_OPENAI_API_KEY'),  #Azure Open AI Key
+#     api_version = "2024-05-01-preview",  #Azue OpenAI API model
+#     azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT') #Azure Open AI end point(매직에꼴)
+# )
 
 def download_audio(url):
     yt = YouTube(url, on_progress_callback = on_progress)
@@ -17,17 +23,18 @@ def download_audio(url):
     renamed_file = audio_file[:-4] + ".mp3"
     video = moviepy.editor.VideoFileClip(audio_file)
     video.audio.write_audiofile(renamed_file)
-    return renamed_file
+    
+    os.remove(audio_file)
+    return renamed_file , yt.title
 
 def transcribe_audio(audio_path):
     audio_file = open(audio_path, "rb")
     transcript = client.audio.transcriptions.create(
-        file=audio_file,
-        model="whisper-1",
-        language="ko",
-        response_format="text",
-        temperature=0.0,
+        model="whisper",
+        file= audio_file,
+        response_format="srt"
     )
+    os.remove(audio_path)
 
     return transcript
 
