@@ -7,11 +7,13 @@ from openai import OpenAI , AzureOpenAI
 import os
 load_dotenv()
 
-client = AzureOpenAI(
-    api_key = os.getenv('AZURE_OPENAI_API_KEY'),  #Azure Open AI Key
-    api_version = "2024-05-01-preview",  #Azue OpenAI API model
-    azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT') #Azure Open AI end point(매직에꼴)
-)
+client = OpenAI()
+
+# client = AzureOpenAI(
+#     api_key = os.getenv('AZURE_OPENAI_API_KEY'),  #Azure Open AI Key
+#     api_version = "2024-05-01-preview",  #Azue OpenAI API model
+#     azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT') #Azure Open AI end point(매직에꼴)
+# )
 
 def download_audio(url):
     yt = YouTube(url, on_progress_callback = on_progress)

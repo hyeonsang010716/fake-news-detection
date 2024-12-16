@@ -44,8 +44,8 @@ class Agent:
 
     def __init__(self):
         load_dotenv()
-        # self.model = ChatOpenAI(model="gpt-4o", temperature=0)
-        self.model = AzureChatOpenAI(model="gpt-4o", temperature=0)
+        self.model = ChatOpenAI(model="gpt-4o", temperature=0)
+        # self.model = AzureChatOpenAI(model="gpt-4o", temperature=0)
         self.graph = self.__graph_init()
 
 
