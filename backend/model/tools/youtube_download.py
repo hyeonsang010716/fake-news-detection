@@ -2,8 +2,10 @@ from pytube import YouTube
 from pytubefix import YouTube
 from pytubefix.cli import on_progress
 import moviepy.editor
+from moviepy.editor import VideoFileClip
 from dotenv import load_dotenv
 from openai import OpenAI , AzureOpenAI
+import openai
 import os
 load_dotenv()
 
@@ -21,26 +23,29 @@ def download_audio(url):
     audio_file = ys.download(filename="audio.mp4")
     
     renamed_file = audio_file[:-4] + ".mp3"
-    video = moviepy.editor.VideoFileClip(audio_file)
-    video.audio.write_audiofile(renamed_file)
+
+    with VideoFileClip(audio_file) as video:
+        video.audio.write_audiofile(renamed_file)
     
     os.remove(audio_file)
-    return renamed_file , yt.title
+    
+    return renamed_file, yt.title
 
 def transcribe_audio(audio_path):
-    audio_file = open(audio_path, "rb")
-    transcript = client.audio.transcriptions.create(
-        model="whisper",
-        file= audio_file,
-        response_format="srt"
-    )
+    
+    with open(audio_path, "rb") as audio_file:
+        transcript = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=audio_file
+        )
+    
+    # 파일 삭제
     os.remove(audio_path)
 
-    return transcript
-
+    return transcript.text
+    
 
 if __name__ == "__main__":
-
     video_url = "https://www.youtube.com/watch?v=bN8XdNQuRVU"
     audio_path = download_audio(video_url)
     transcribed_text = transcribe_audio(audio_path)
