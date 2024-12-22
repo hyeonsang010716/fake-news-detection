@@ -27,3 +27,6 @@ print(response["keywords"])
 
 print("주장들 결과 : ")
 print(response["response"])
+
+print("---"*20)
+print(type(response["response"][0]))
